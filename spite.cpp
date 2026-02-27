@@ -75,7 +75,7 @@ public:
             else if (op == "⊟") out << "    exhume();\n";
             else if (op == "»") out << "    P++;\n";
             else if (op == "«") out << "    P--;\n";
-            else if (op == "¿") out << "    if(!a.empty() && a.back() != 0) {\n";
+            else if (op == "¿") out << "    if(!a.empty() && [&](){ int v=a.back(); a.pop_back(); return v; }() != 0) {\n";
             else if (op == "?") out << "    }\n";
             else if (op == "^") {
                 std::string name;
@@ -131,7 +131,9 @@ public:
             else if (op == "⊟") { alpha.push_back(void_space[((P % (int)void_space.size()) + void_space.size()) % void_space.size()]); }
             else if (op == "»") { P++; } else if (op == "«") { P--; }
             else if (op == "¿") {
-                if (alpha.empty() || alpha.back() == 0) {
+                int top = alpha.empty() ? 0 : alpha.back();
+                if (!alpha.empty()) alpha.pop_back();
+                if (top == 0) {
                     int depth = 1;
                     while (depth > 0 && ++ip < program.length()) {
                         if ((unsigned char)program[ip] == 0xC2 && (unsigned char)program[ip+1] == 0xBF) { depth++; ip++; }
@@ -140,7 +142,7 @@ public:
                 }
             } else if (op == "^") {
                 std::string name; while (ip + 1 < program.length() && isalnum(program[++ip])) name += program[ip];
-                echo.push(ip); if (checkpoints.count(name)) ip = checkpoints[name] - 1;
+                if (checkpoints.count(name)) ip = checkpoints[name] - 1;
             } else if (op == "↩") { if (!echo.empty()) { ip = echo.top(); echo.pop(); } }
             else if (isdigit(c)) {
                 std::string num; while (ip < program.length() && isdigit(program[ip])) num += program[ip++];
